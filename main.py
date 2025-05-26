@@ -32,5 +32,21 @@ def main():
     except Exception as e:
         print(f"Failed to save loadout: {e}")
 
+    # Load the loadout
+    try:
+        loaded_loadout = storage.load("test_loadout")
+        print(f"Loadout '{loaded_loadout.name}' loaded successfully.")
+        print("Equipped items:", loaded_loadout.equipped)
+        print("Inventory items:", loaded_loadout.inventory)
+    except Exception as e:
+        print(f"Failed to load loadout: {e}")
+
+    # List all loadouts
+    try:
+        loadouts = storage.list_loadouts()
+        print("Available loadouts:", loadouts)
+    except Exception as e:
+        print(f"Failed to list loadouts: {e}")
+
 if __name__ == "__main__":
     main()
