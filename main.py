@@ -1,23 +1,29 @@
 import os.path
 from app.models import Loadout
 from app.storage import LoadoutStorage
+from app.item import Item
 
 def main():
     # Example equipped and inventory data (replace with your real items/structure)
     equipped = {
-        "head": "Iron Full Helm",
-        "body": "Steel Platebody",
-        "legs": "Steel Platelegs",
-        "weapon": "Rune Sword",
-        "shield": "Dragon Square Shield",
-        "cape": "Fire Cape",
-        "neck": "Amulet of Power",
-        "gloves": "Barrows Gloves",
-        "boots": "Dragon Boots",
-        "ring": "Ring of Wealth"
+        "head": Item(name="Iron Full Helm", slot="head"),
+        "body": Item(name="Steel Platebody", slot="body"),
+        "legs": Item(name="Steel Platelegs", slot="legs"),
+        "weapon": Item(name="Rune Sword", slot="weapon"),
+        "shield": Item(name="Dragon Square Shield", slot="shield"),
+        "cape": Item(name="Fire Cape", slot="cape"),
+        "neck": Item(name="Amulet of Power", slot="neck"),
+        "gloves": Item(name="Barrows Gloves", slot="gloves"),
+        "boots": Item(name="Dragon Boots", slot="boots"),
+        "ring": Item(name="Ring of Wealth", slot="ring")
     }
 
-    inventory = ["Prayer Potion(4)", "Shark"]
+    inventory = [
+        Item(name="Super Restore Potion", quantity=4),
+        Item(name="Shark", quantity=10),
+        Item(name="Antidote++", quantity=2),
+        Item(name="Prayer Potion", quantity=5)
+    ]
 
     # Create storage instance
     storage = LoadoutStorage()
