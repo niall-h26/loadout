@@ -1,13 +1,15 @@
-import os, json
+import os
+import json
+from typing import List
 from .models import Loadout
 
 class LoadoutStorage:
-    def __init__ (self, directory="loadouts"):
+    def __init__(self, directory: str = "loadouts") -> None:
         self.directory = directory
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-    def save(self, loadout, overwrite=False):
+    def save(self, loadout: Loadout, overwrite: bool = False) -> None:
         """
         Save the loadout to a file.
         """
@@ -23,7 +25,7 @@ class LoadoutStorage:
         except Exception as e:
             raise ValueError(f"Failed to save loadout '{loadout.name}': {e}")
 
-    def load(self, name):
+    def load(self, name: str) -> Loadout:
         """
         Load the loadout from a file.
         """
@@ -39,7 +41,7 @@ class LoadoutStorage:
         except Exception as e:
             raise ValueError(f"An error occurred while loading the loadout: {e}")
         
-    def delete(self, name):
+    def delete(self, name: str) -> None:
         """
         Delete the loadout file.
         """
@@ -53,13 +55,12 @@ class LoadoutStorage:
         except Exception as e:
             raise ValueError(f"An error occurred while deleting the loadout: {e}")
     
-    def list_loadouts(self):
+    def list_loadouts(self) -> List[str]:
         """
         List all loadouts in the storage directory.
         """
         try:
             files = [f for f in os.listdir(self.directory) if f.endswith('.json')]
-            # Strip the '.json' extension before returning
             return [os.path.splitext(f)[0] for f in files]
         
         except Exception as e:
