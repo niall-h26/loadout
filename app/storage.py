@@ -30,7 +30,7 @@ class LoadoutStorage:
         Load the loadout from a file.
         """
         try:
-            filename = os.path.join(self.directory, name + '.json')
+            filename = os.path.join(self.directory, f"{name}.json")
             with open(filename, 'r') as file:
                 data = json.load(file)
                 return Loadout.from_dict(data)
@@ -46,7 +46,7 @@ class LoadoutStorage:
         Delete the loadout file.
         """
         try:
-            filename = os.path.join(self.directory, name + '.json')
+            filename = os.path.join(self.directory, f"{name}.json")
             os.remove(filename)
         
         except FileNotFoundError:

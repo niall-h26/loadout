@@ -25,7 +25,7 @@ class Loadout:
             "head", "body", "legs", "weapon", "shield",
             "cape", "neck", "gloves", "boots", "ring"
         }
-        if self.name is None or self.name == "":
+        if self.name == "":
             raise ValueError("Loadout name cannot be empty")
         if len(self.inventory) > 28:
             raise ValueError("Inventory cannot exceed 28 items")
@@ -53,6 +53,10 @@ class Loadout:
         :param data: Dictionary with keys 'name', 'equipped', and 'inventory'.
         :return: A Loadout instance.
         """
+        name = data.get("name")
+        if not isinstance(name, str) or name.strip() == "":
+            raise ValueError("The 'name' field is required and must be a non-empty string.")
+    
         equipped_data = data.get("equipped", {})
         inventory_data = data.get("inventory", [])
 
@@ -60,7 +64,7 @@ class Loadout:
         inventory = [Item.from_dict(item_data) for item_data in inventory_data]
 
         return cls(
-            name=data.get("name"),
+            name=name,
             equipped=equipped,
             inventory=inventory
         )
