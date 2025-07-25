@@ -1,0 +1,127 @@
+{
+	"info": {
+		"_postman_id": "23ea6946-cad9-4284-b3cc-e75106bd801c",
+		"name": "osrs loadout",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47083052",
+		"_collection_link": "https://joint-operations-geoscientist-65045246-4785665.postman.co/workspace/Niall-H's-Workspace~5533e454-43b4-4224-89e8-c98b8b8b417c/collection/47083052-23ea6946-cad9-4284-b3cc-e75106bd801c?action=share&source=collection_link&creator=47083052"
+	},
+	"item": [
+		{
+			"name": "List Loadouts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/loadouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"loadouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Loadout",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"bossing_gear\",\n  \"equipped\": {\n    \"head\": { \"name\": \"Iron Full Helm\", \"slot\": \"head\" },\n    \"body\": { \"name\": \"Steel Platebody\", \"slot\": \"body\" },\n    \"legs\": { \"name\": \"Steel Platelegs\", \"slot\": \"legs\" },\n    \"weapon\": { \"name\": \"Rune Sword\", \"slot\": \"weapon\" },\n    \"shield\": { \"name\": \"Dragon Square Shield\", \"slot\": \"shield\" },\n    \"cape\": { \"name\": \"Fire Cape\", \"slot\": \"cape\" },\n    \"neck\": { \"name\": \"Amulet of Power\", \"slot\": \"neck\" },\n    \"gloves\": { \"name\": \"Barrows Gloves\", \"slot\": \"gloves\" },\n    \"boots\": { \"name\": \"Dragon Boots\", \"slot\": \"boots\" },\n    \"ring\": { \"name\": \"Ring of Wealth\", \"slot\": \"ring\" }\n  },\n  \"inventory\": [\n    { \"name\": \"Super Restore Potion\", \"quantity\": 4 },\n    { \"name\": \"Shark\", \"quantity\": 10 },\n    { \"name\": \"Antidote++\", \"quantity\": 2 },\n    { \"name\": \"Prayer Potion\", \"quantity\": 5 }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/loadouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"loadouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Loadout",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/loadouts/bossing_gear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"loadouts",
+						"bossing_gear"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Loadout",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"bossing_gear\",\n  \"equipped\": {\n    \"head\": { \"name\": \"Steel Full Helm\", \"slot\": \"head\" },\n    \"body\": { \"name\": \"Steel Platebody\", \"slot\": \"body\" },\n    \"legs\": { \"name\": \"Steel Platelegs\", \"slot\": \"legs\" },\n    \"weapon\": { \"name\": \"Rune Sword\", \"slot\": \"weapon\" },\n    \"shield\": { \"name\": \"Dragon Square Shield\", \"slot\": \"shield\" },\n    \"cape\": { \"name\": \"Fire Cape\", \"slot\": \"cape\" },\n    \"neck\": { \"name\": \"Amulet of Power\", \"slot\": \"neck\" },\n    \"gloves\": { \"name\": \"Barrows Gloves\", \"slot\": \"gloves\" },\n    \"boots\": { \"name\": \"Dragon Boots\", \"slot\": \"boots\" },\n    \"ring\": { \"name\": \"Ring of Wealth\", \"slot\": \"ring\" }\n  },\n  \"inventory\": [\n    { \"name\": \"Super Restore Potion\", \"quantity\": 4 },\n    { \"name\": \"Shark\", \"quantity\": 10 },\n    { \"name\": \"Antidote++\", \"quantity\": 2 },\n    { \"name\": \"Prayer Potion\", \"quantity\": 5 }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/loadouts/my_loadout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"loadouts",
+						"my_loadout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/loadouts/bossing_gear",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"loadouts",
+						"bossing_gear"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

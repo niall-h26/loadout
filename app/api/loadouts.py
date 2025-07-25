@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
-from storage import LoadoutStorage
-from models import Loadout
+from app.storage import LoadoutStorage
+from app.models import Loadout
+from typing import Dict, Any
 
 router = APIRouter()
 storage = LoadoutStorage()
@@ -17,7 +18,7 @@ def get_loadout(name: str):
         raise HTTPException(status_code=404, detail=str(e))
 
 @router.post("/")
-def create_loadout(loadout: dict):
+def create_loadout(loadout: Dict[str, Any]):
     try:
         obj = Loadout.from_dict(loadout)
         obj.validate()
@@ -27,7 +28,7 @@ def create_loadout(loadout: dict):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.put("/{name}")
-def update_loadout(name: str, loadout: dict):
+def update_loadout(name: str, loadout: Dict[str, Any]):
     try:
         obj = Loadout.from_dict(loadout)
         obj.validate()
