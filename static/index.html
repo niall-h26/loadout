@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OSRS Loadout Manager</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    #error-banner {
+      display: none;
+      background: #7f1d1d;
+      color: #fca5a5;
+      padding: 0.6rem 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    #loading {
+      display: none;
+      background: #1e3a5f;
+      color: #93c5fd;
+      padding: 0.4rem 1rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    #app {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Left panel: Loadout List ── */
+    #loadout-list-panel {
+      width: 260px;
+      min-width: 200px;
+      background: #111;
+      border-right: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.75rem;
+      overflow-y: auto;
+    }
+
+    #loadout-list-panel h2 {
+      font-size: 1rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    #new-loadout-btn {
+      padding: 0.5rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    #new-loadout-btn:hover { background: #1d4ed8; }
+
+    #loadout-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .loadout-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 4px;
+      background: #1e1e1e;
+    }
+
+    .loadout-item:hover {
+      background: #252525;
+    }
+
+    .loadout-item-name {
+      flex: 1;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #e0e0e0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .loadout-item-name:hover {
+      color: #93c5fd;
+    }
+
+    .loadout-item-edit,
+    .loadout-item-delete {
+      flex-shrink: 0;
+      padding: 0.2rem 0.45rem;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+
+    .loadout-item-edit {
+      background: #374151;
+      color: #d1d5db;
+    }
+
+    .loadout-item-edit:hover {
+      background: #4b5563;
+    }
+
+    .loadout-item-delete {
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
+
+    .loadout-item-delete:hover {
+      background: #991b1b;
+    }
+
+    .loadout-list-empty {
+      color: #555;
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .loadout-list-error {
+      color: #fca5a5;
+      font-size: 0.85rem;
+    }
+
+    /* ── Right panel: Loadout Editor ── */
+    #loadout-editor-panel {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      background: #1a1a1a;
+    }
+
+    #loadout-editor-panel h2 {
+      font-size: 1rem;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    #editor-form {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 600px;
+    }
+
+    #editor-placeholder {
+      color: #555;
+      font-size: 0.95rem;
+    }
+
+    fieldset {
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+    }
+
+    legend {
+      color: #aaa;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0 0.4rem;
+    }
+
+    .slot-row, .inv-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+    }
+
+    .slot-row label {
+      width: 70px;
+      font-size: 0.85rem;
+      color: #aaa;
+      text-transform: capitalize;
+      flex-shrink: 0;
+    }
+
+    .inv-row .inv-index {
+      width: 28px;
+      font-size: 0.8rem;
+      color: #555;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .slot-item-name, .inv-item-name {
+      flex: 1;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 3px;
+      color: #e0e0e0;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .slot-item-qty, .inv-item-qty {
+      width: 60px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 3px;
+      color: #e0e0e0;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .field-error {
+      color: #fca5a5;
+      font-size: 0.78rem;
+      min-height: 1em;
+    }
+
+    #editor-name {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      border-radius: 3px;
+      color: #e0e0e0;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    #submit-btn {
+      padding: 0.5rem 1.2rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-right: 0.5rem;
+    }
+
+    #submit-btn:disabled {
+      background: #1e3a5f;
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    #cancel-btn {
+      padding: 0.5rem 1rem;
+      background: #374151;
+      color: #d1d5db;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    #cancel-btn:hover { background: #4b5563; }
+  </style>
+</head>
+<body>
+
+  <!-- Global error banner -->
+  <div id="error-banner" role="alert"></div>
+
+  <!-- Loading indicator -->
+  <div id="loading" aria-live="polite">Loading…</div>
+
+  <div id="app">
+
+    <!-- Left panel: Loadout List -->
+    <aside id="loadout-list-panel">
+      <h2>Loadouts</h2>
+      <button id="new-loadout-btn" type="button">+ New Loadout</button>
+      <ul id="loadout-list" aria-label="Saved loadouts"></ul>
+    </aside>
+
+    <!-- Right panel: Loadout Editor -->
+    <main id="loadout-editor-panel">
+      <h2>Loadout Editor</h2>
+
+      <p id="editor-placeholder">Select a loadout or create a new one.</p>
+
+      <form id="editor-form" novalidate aria-label="Loadout editor">
+        <!-- Name field -->
+        <div>
+          <label for="editor-name">Name</label>
+          <input id="editor-name" type="text" name="name" autocomplete="off" />
+          <span class="field-error" id="error-name"></span>
+        </div>
+
+        <!-- Equipment Panel -->
+        <fieldset id="equipment-panel">
+          <legend>Equipment</legend>
+          <!-- Slot rows will be rendered here by JS -->
+        </fieldset>
+
+        <!-- Inventory Panel -->
+        <fieldset id="inventory-panel">
+          <legend>Inventory (max 28)</legend>
+          <!-- Inventory rows will be rendered here by JS -->
+        </fieldset>
+
+        <!-- Form-level error -->
+        <span class="field-error" id="error-form"></span>
+
+        <div>
+          <button id="submit-btn" type="submit">Save</button>
+          <button id="cancel-btn" type="button">Cancel</button>
+        </div>
+      </form>
+    </main>
+
+  </div>
+
+  <script>
+    const api = {
+      async listLoadouts() {
+        let res;
+        try {
+          res = await fetch('http://localhost:8000/loadouts');
+        } catch {
+          throw { status: 0, detail: 'Cannot connect to server. Is the API running?' };
+        }
+        const data = await res.json();
+        if (!res.ok) throw { status: res.status, detail: data.detail || 'Unknown error' };
+        return data;
+      },
+
+      async getLoadout(name) {
+        let res;
+        try {
+          res = await fetch(`http://localhost:8000/loadouts/${encodeURIComponent(name)}`);
+        } catch {
+          throw { status: 0, detail: 'Cannot connect to server. Is the API running?' };
+        }
+        const data = await res.json();
+        if (!res.ok) throw { status: res.status, detail: data.detail || 'Unknown error' };
+        return data;
+      },
+
+      async createLoadout(body) {
+        let res;
+        try {
+          res = await fetch('http://localhost:8000/loadouts/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+        } catch {
+          throw { status: 0, detail: 'Cannot connect to server. Is the API running?' };
+        }
+        const data = await res.json();
+        if (!res.ok) throw { status: res.status, detail: data.detail || 'Unknown error' };
+        return data;
+      },
+
+      async updateLoadout(name, body) {
+        let res;
+        try {
+          res = await fetch(`http://localhost:8000/loadouts/${encodeURIComponent(name)}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+        } catch {
+          throw { status: 0, detail: 'Cannot connect to server. Is the API running?' };
+        }
+        const data = await res.json();
+        if (!res.ok) throw { status: res.status, detail: data.detail || 'Unknown error' };
+        return data;
+      },
+
+      async deleteLoadout(name) {
+        let res;
+        try {
+          res = await fetch(`http://localhost:8000/loadouts/${encodeURIComponent(name)}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+          });
+        } catch {
+          throw { status: 0, detail: 'Cannot connect to server. Is the API running?' };
+        }
+        const data = await res.json();
+        if (!res.ok) throw { status: res.status, detail: data.detail || 'Unknown error' };
+        return data;
+      },
+    };
+  </script>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────────────────────
+    const state = {
+      loadouts: [],
+      editorMode: null,   // 'create' | 'edit' | null
+      editorData: null,   // LoadoutSchema | null
+      loading: false,
+      error: null,
+    };
+
+    // ── Constants ──────────────────────────────────────────────────────────────
+    const SLOTS = ['head', 'body', 'legs', 'weapon', 'shield', 'cape', 'neck', 'gloves', 'boots', 'ring'];
+
+    // ── Equipment Panel (task 6.1) ─────────────────────────────────────────────
+    function renderEquipmentPanel(equippedData) {
+      const panel = document.getElementById('equipment-panel');
+      // Remove all children except the legend
+      const legend = panel.querySelector('legend');
+      panel.innerHTML = '';
+      panel.appendChild(legend);
+
+      for (const slot of SLOTS) {
+        const item = equippedData[slot] || {};
+        const row = document.createElement('div');
+        row.className = 'slot-row';
+
+        const label = document.createElement('label');
+        label.textContent = slot;
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'slot-item-name';
+        nameInput.dataset.slot = slot;
+        nameInput.placeholder = 'item name';
+        nameInput.value = item.name || '';
+
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.className = 'slot-item-qty';
+        qtyInput.dataset.slot = slot;
+        qtyInput.min = '1';
+        qtyInput.value = item.quantity || 1;
+
+        const errSpan = document.createElement('span');
+        errSpan.className = 'field-error';
+        errSpan.dataset.qtyError = slot;
+
+        row.appendChild(label);
+        row.appendChild(nameInput);
+        row.appendChild(qtyInput);
+        row.appendChild(errSpan);
+        panel.appendChild(row);
+      }
+    }
+
+    // ── Inventory Panel (task 7.1) ─────────────────────────────────────────────
+    function renderInventoryPanel(inventoryData) {
+      const panel = document.getElementById('inventory-panel');
+      const legend = panel.querySelector('legend');
+      panel.innerHTML = '';
+      panel.appendChild(legend);
+
+      for (let i = 0; i < 28; i++) {
+        const item = inventoryData[i] || {};
+        const row = document.createElement('div');
+        row.className = 'inv-row';
+
+        const indexLabel = document.createElement('span');
+        indexLabel.className = 'inv-index';
+        indexLabel.textContent = i + 1;
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.className = 'inv-item-name';
+        nameInput.dataset.idx = String(i);
+        nameInput.placeholder = 'item name';
+        nameInput.value = item.name || '';
+
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.className = 'inv-item-qty';
+        qtyInput.dataset.idx = String(i);
+        qtyInput.min = '1';
+        qtyInput.value = item.quantity || 1;
+
+        const errSpan = document.createElement('span');
+        errSpan.className = 'field-error';
+        errSpan.dataset.qtyError = `inv-${i}`;
+
+        row.appendChild(indexLabel);
+        row.appendChild(nameInput);
+        row.appendChild(qtyInput);
+        row.appendChild(errSpan);
+        panel.appendChild(row);
+      }
+    }
+
+    // ── openEditor (task 5.2) ──────────────────────────────────────────────────
+    function openEditor(mode, loadout) {
+      state.editorMode = mode;
+      state.editorData = loadout || null;
+
+      document.getElementById('editor-placeholder').style.display = 'none';
+      document.getElementById('editor-form').style.display = 'flex';
+
+      // Clear all field errors
+      document.querySelectorAll('.field-error').forEach(el => { el.textContent = ''; });
+
+      // Set name field
+      const nameInput = document.getElementById('editor-name');
+      nameInput.value = mode === 'edit' && loadout ? loadout.name : '';
+
+      // Render panels
+      renderEquipmentPanel(loadout?.equipped || {});
+      renderInventoryPanel(loadout?.inventory || []);
+
+      // Update submit button state
+      updateSubmitBtn();
+    }
+
+    // ── closeEditor ────────────────────────────────────────────────────────────
+    function closeEditor() {
+      document.getElementById('editor-form').style.display = 'none';
+      document.getElementById('editor-placeholder').style.display = '';
+      state.editorMode = null;
+      state.editorData = null;
+    }
+
+    // ── buildPayload (task 5.4) ────────────────────────────────────────────────
+    function buildPayload() {
+      const name = document.getElementById('editor-name').value;
+
+      const equipped = {};
+      document.querySelectorAll('.slot-item-name').forEach(input => {
+        const itemName = input.value.trim();
+        if (!itemName) return;
+        const slot = input.dataset.slot;
+        const qtyInput = document.querySelector(`.slot-item-qty[data-slot="${slot}"]`);
+        const qty = parseInt(qtyInput?.value, 10);
+        equipped[slot] = { name: itemName, slot, quantity: isNaN(qty) || qty < 1 ? 1 : qty };
+      });
+
+      const inventory = [];
+      document.querySelectorAll('.inv-item-name').forEach(input => {
+        const itemName = input.value.trim();
+        if (!itemName) return;
+        const idx = input.dataset.idx;
+        const qtyInput = document.querySelector(`.inv-item-qty[data-idx="${idx}"]`);
+        const qty = parseInt(qtyInput?.value, 10);
+        inventory.push({ name: itemName, quantity: isNaN(qty) || qty < 1 ? 1 : qty });
+      });
+
+      return { name, equipped, inventory };
+    }
+
+    // ── validateForm (task 8.1) ────────────────────────────────────────────────
+    function validateForm() {
+      let valid = true;
+
+      // Clear previous errors
+      document.querySelectorAll('.field-error').forEach(el => { el.textContent = ''; });
+
+      // Validate name
+      const nameVal = document.getElementById('editor-name').value;
+      if (!nameVal || !nameVal.trim()) {
+        document.getElementById('error-name').textContent = 'Name cannot be empty or whitespace only.';
+        valid = false;
+      }
+
+      // Validate slot quantities where name is filled
+      document.querySelectorAll('.slot-item-name').forEach(input => {
+        if (!input.value.trim()) return;
+        const slot = input.dataset.slot;
+        const qtyInput = document.querySelector(`.slot-item-qty[data-slot="${slot}"]`);
+        const qty = parseInt(qtyInput?.value, 10);
+        if (isNaN(qty) || qty < 1) {
+          const errSpan = document.querySelector(`[data-qty-error="${slot}"]`);
+          if (errSpan) errSpan.textContent = 'Quantity must be at least 1.';
+          valid = false;
+        }
+      });
+
+      // Validate inventory quantities where name is filled
+      document.querySelectorAll('.inv-item-name').forEach(input => {
+        if (!input.value.trim()) return;
+        const idx = input.dataset.idx;
+        const qtyInput = document.querySelector(`.inv-item-qty[data-idx="${idx}"]`);
+        const qty = parseInt(qtyInput?.value, 10);
+        if (isNaN(qty) || qty < 1) {
+          const errSpan = document.querySelector(`[data-qty-error="inv-${idx}"]`);
+          if (errSpan) errSpan.textContent = 'Quantity must be at least 1.';
+          valid = false;
+        }
+      });
+
+      return valid;
+    }
+
+    // ── Submit button disabled state ───────────────────────────────────────────
+    function updateSubmitBtn() {
+      const nameVal = document.getElementById('editor-name').value;
+      document.getElementById('submit-btn').disabled = state.loading || !nameVal || !nameVal.trim();
+    }
+
+    // ── Loading indicator ──────────────────────────────────────────────────────
+    function setLoading(on) {
+      state.loading = on;
+      document.getElementById('loading').style.display = on ? 'block' : 'none';
+      const submitBtn = document.getElementById('submit-btn');
+      if (submitBtn) submitBtn.disabled = on || !document.getElementById('editor-name').value.trim();
+    }
+
+    // ── Render ─────────────────────────────────────────────────────────────────
+    function renderLoadoutList() {
+      const ul = document.getElementById('loadout-list');
+      ul.innerHTML = '';
+
+      if (state.loadouts.length === 0) {
+        const li = document.createElement('li');
+        li.className = 'loadout-list-empty';
+        li.textContent = 'No loadouts saved yet.';
+        ul.appendChild(li);
+        return;
+      }
+
+      for (const loadout of state.loadouts) {
+        const li = document.createElement('li');
+        li.className = 'loadout-item';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'loadout-item-name';
+        nameSpan.textContent = loadout;
+        nameSpan.title = loadout;
+        nameSpan.addEventListener('click', async () => {
+          setLoading(true);
+          try {
+            const data = await api.getLoadout(loadout);
+            openEditor('edit', data);
+          } catch (err) {
+            if (err.status === 404) {
+              document.getElementById('editor-placeholder').style.display = '';
+              document.getElementById('editor-form').style.display = 'none';
+              document.getElementById('editor-placeholder').textContent = `Loadout "${loadout}" not found.`;
+            } else {
+              showErrorBanner(err.detail || 'Failed to load loadout.');
+            }
+          } finally {
+            setLoading(false);
+          }
+        });
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'loadout-item-edit';
+        editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', async () => {
+          setLoading(true);
+          try {
+            const data = await api.getLoadout(loadout);
+            openEditor('edit', data);
+          } catch (err) {
+            showErrorBanner(err.detail || 'Failed to load loadout.');
+          } finally {
+            setLoading(false);
+          }
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'loadout-item-delete';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => confirmDelete(loadout));
+
+        li.appendChild(nameSpan);
+        li.appendChild(editBtn);
+        li.appendChild(deleteBtn);
+        ul.appendChild(li);
+      }
+    }
+
+    // ── Delete ─────────────────────────────────────────────────────────────────
+    async function confirmDelete(name) {
+      if (!window.confirm(`Delete loadout "${name}"?`)) return;
+      setLoading(true);
+      try {
+        await api.deleteLoadout(name);
+        state.loadouts = state.loadouts.filter(n => n !== name);
+        renderLoadoutList();
+      } catch (err) {
+        const msg = err.status === 404 ? `Loadout "${name}" not found.` : (err.detail || 'Failed to delete loadout.');
+        showErrorBanner(msg);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // ── Error banner ───────────────────────────────────────────────────────────
+    function showErrorBanner(message) {
+      const banner = document.getElementById('error-banner');
+      banner.textContent = message;
+      banner.style.display = 'block';
+    }
+
+    // ── Load list ──────────────────────────────────────────────────────────────
+    async function loadLoadoutList() {
+      setLoading(true);
+      const ul = document.getElementById('loadout-list');
+      try {
+        const names = await api.listLoadouts();
+        state.loadouts = names;
+        renderLoadoutList();
+      } catch (err) {
+        ul.innerHTML = '';
+        const li = document.createElement('li');
+        li.className = 'loadout-list-error';
+        li.textContent = err.detail || 'Failed to load loadouts.';
+        ul.appendChild(li);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // ── New Loadout button ─────────────────────────────────────────────────────
+    document.getElementById('new-loadout-btn').addEventListener('click', () => {
+      openEditor('create');
+    });
+
+    // ── Name input: update submit btn + clear name error ───────────────────────
+    document.getElementById('editor-name').addEventListener('input', () => {
+      updateSubmitBtn();
+      document.getElementById('error-name').textContent = '';
+    });
+
+    // ── Cancel button ──────────────────────────────────────────────────────────
+    document.getElementById('cancel-btn').addEventListener('click', closeEditor);
+
+    // ── Form submit ────────────────────────────────────────────────────────────
+    document.getElementById('editor-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validateForm()) return;
+
+      const payload = buildPayload();
+      const errForm = document.getElementById('error-form');
+      errForm.textContent = '';
+
+      setLoading(true);
+      try {
+        if (state.editorMode === 'create') {
+          await api.createLoadout(payload);
+          state.loadouts.push(payload.name);
+        } else {
+          const originalName = state.editorData?.name;
+          await api.updateLoadout(originalName, payload);
+          const idx = state.loadouts.indexOf(originalName);
+          if (idx !== -1) state.loadouts[idx] = payload.name;
+        }
+        renderLoadoutList();
+        closeEditor();
+      } catch (err) {
+        if (state.editorMode === 'edit' && err.status === 404) {
+          errForm.textContent = 'Loadout no longer exists.';
+        } else {
+          errForm.textContent = err.detail || 'Failed to save loadout.';
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    // ── Bootstrap ─────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', loadLoadoutList);
+  </script>
+
+</body>
+</html>
